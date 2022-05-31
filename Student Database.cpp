@@ -1,13 +1,17 @@
-//Name Muhammad Asim 
+ //Name Muhammad Asim 
 //RegNo 3956-FBAS-BSCS-F18(B)
 //sir Nadeem
 #include <iostream>
+#include <string>
+#include <fstream>
 using namespace std;
 //pre processor director
 #define SIZE 70
 #define RMAX 3
 #define TM 100
 #define SUB 3
+ofstream outfile;
+fstream infile;
 //structure defination
 struct student
 {
@@ -19,7 +23,9 @@ struct student
 	char grd;
 };
 //function defination
-
+void appendfile();
+void readData(student ss[],int& nn);
+void savedata(student ss[],int nn);
 void checkreg1(student sss[], int nnn, int ii);
 void checkreg2(student sss[], int nnn, int ii);
 void checkm(student ss[], int nn, int i, int j);
@@ -52,6 +58,7 @@ void proc()
 	do
 	{
 		cout << "\n              ....Main Menu...." << endl;
+		cout<<"      0. readData\n";
 		cout << "      1. Create database" << endl;
 		cout << "      2. Append new results" << endl;
 		cout << "      3. Prepare results" << endl;;
@@ -60,12 +67,18 @@ void proc()
 		cout << "      6. Updation" << endl;
 		cout << "      7. Delation" << endl;
 		cout << "      8. Display result" << endl;
-		cout << "      9. Exit" << endl;
-
+		cout<<"      9. Savedata\n";
+		cout << "      10. Exit" << endl;
+		cout << "      11. Append in file" << endl;
 		cout << "Please enter the choice: ";
 		cin >> ch;
 		switch (ch)
 		{
+		case 0:
+			infile.open("database.dat",ios::in);
+			readData(s,n);
+			infile.close();
+			break;
 		case 1:
 			myinput(s, n, check);
 			break;
@@ -96,17 +109,14 @@ void proc()
 
 				if (pos == -1)
 					cout << "Result Not Found, Sorry";
-
 				else
 				{
-
 					cout << "\nResult Found\nHere it is:\n";
 					cout << "Name\t";
 					/*fixnamespaces(ss, pos);*/
 					cout << "Regg" << "\t" << "Subj1" << "\t" << "Subj2" << "\t" << "Subj3" << "\t" << "TMO" << "\t" << "Perc" << "\t" << "Grade" << "\n";
 					cout << s[pos].name << "\t";
 					cout << s[pos].reg << "\t";
-
 					for (int j = 0; j < SUB; j++)
 					{
 						cout << s[pos].sub[j] << "\t";
@@ -123,7 +133,6 @@ void proc()
 		case 5:
 			if (check > 0)
 				sorting(s, n);
-
 			else
 				cout << "Please create database first.";
 			break;
@@ -143,20 +152,78 @@ void proc()
 				cout << "Please create database first.";
 			break;
 		case 8:
-			if (check > 0)
-			{
 				display(s, n);
-			}
-			else
-				cout << "Please create database first.";
 			break;
 		case 9:
+			outfile.open("database.dat", ios::app|ios::in);
+			savedata(s,n);
+			outfile.close();
+			break;
+		case 10:
 			con = false;
 			break;
+		case 11:
+			appendfile();
+			break;
 		}
-
-
 	} while (con);
+}
+void appendfile()
+{
+	int record_no,n;
+	cout<<"Enter record n0#: ";
+	cin>>record_no;
+	fstream file;
+	file.open("database.txt", ios::in|ios::app);
+	file.seekg(0,ios::beg);
+	file.read(reinterpret_cast<char*>(&n),sizeof(int));
+	if(!(record_no>=1 && record_no<=n))
+	{
+		cout<<"Record not in file\n";
+		exit(-1);
+		
+	}
+	student obj;
+	int jump=(record_no-1)*sizeof(student);
+	file.seekg(jump,ios::cur);
+	file.read(reinterpret_cast<char*>(&obj),sizeof(student));
+	//obj.setter();
+	file.seekp(0,ios::beg);
+	int jumpp=jump+sizeof(int);
+	file.seekp(jumpp,ios::beg);
+	file.write(reinterpret_cast<char*>(&obj),sizeof(student));
+	file.close();	
+}
+void savedata(student ss[],int nn)
+{
+	ofstream outfile;
+	outfile.open("database.dat", ios::app|ios::binary );
+	if(!outfile)
+	{
+		cout<<"Errors";
+		exit(-1);
+	}
+	outfile.write(reinterpret_cast<char*>(&nn),nn*sizeof(int));
+	outfile.write(reinterpret_cast<char*>(ss),nn*sizeof(student));
+	//cout<<"SIZE OF FILE: "<<sizeof(file);
+	cout<<"DATA HAS BEEN WROTE IN THE FILE\n";
+}
+
+void readData(student ss[],int& nn)
+{
+	fstream infile;
+	infile.open("database.dat",ios::in|ios::binary);
+	if(!infile)
+	{
+		cout<<"Errors";
+		exit(-1);
+	}
+	infile.read(reinterpret_cast<char*>(&nn),sizeof(int));
+	infile.read(reinterpret_cast<char*>(ss),nn*sizeof(student));
+	cout<<"SIZE IS "<<nn<<endl;
+	infile.close();
+	cout<<"DATA HAS BEEN READ IN THE FILE\n";
+	
 }
 void myinput(student ss[], int& nn, int& checkk)
 {
@@ -178,7 +245,6 @@ void myinput(student ss[], int& nn, int& checkk)
 		cin.ignore(10, '\n');
 		cout << "Enter the name of student " << i + 1 << ": ";
 		getline(cin, ss[i].name);
-
 		for (int j = 0; j < SUB; j++)
 		{
 
@@ -283,7 +349,6 @@ void display(student ss[], int nn)
 		break;
 	}
 }
-
 void append(student ss[], int& nn)
 {
 	nn = nn++;
